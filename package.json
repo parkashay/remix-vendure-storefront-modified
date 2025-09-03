@@ -13,8 +13,7 @@
     "dev:cf": "cross-env CF_PAGES=1 remix dev --manual -c \"yarn run dev:wrangler\"",
     "start:cf": "cross-env NODE_ENV=production yarn run dev:wrangler",
     "start": "remix-serve build",
-    "generate": "graphql-codegen --config codegen.yml",
-    "prepare": "husky install"
+    "generate": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
     "@graphql-codegen/typescript-generic-sdk": "^3.0.4",
@@ -65,7 +64,6 @@
     "@types/react-dom": "^18.0.9",
     "autoprefixer": "^10.4.13",
     "concurrently": "^7.5.0",
-    "husky": "^8.0.0",
     "lint-staged": "^13.0.3",
     "postcss": "^8.4.19",
     "prettier": "^2.6.2",
