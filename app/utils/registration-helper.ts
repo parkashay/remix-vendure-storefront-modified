@@ -46,3 +46,20 @@ export const extractRegistrationFormValues = (
 
   return { input };
 };
+
+export const validatePasswordResetForm = (
+  formData: FormData,
+): RegisterValidationErrors => {
+  const errors: RegisterValidationErrors = {};
+  const password = formData.get('password');
+  const repeatPassword = formData.get('repeatPassword');
+
+  if (!password || typeof password !== 'string' || password.length < 8) {
+    errors.password = 'Password must be at lease 8 characters long';
+  }
+  if (repeatPassword !== password) {
+    errors.repeatPassword = 'Passwords do not match';
+  }
+
+  return errors;
+};

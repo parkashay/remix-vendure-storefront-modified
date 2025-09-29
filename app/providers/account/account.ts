@@ -118,6 +118,18 @@ export async function updateCustomerPassword(
     .then((res) => res.updateCustomerPassword);
 }
 
+export async function requestPasswordReset(emailAddress: string) {
+  return sdk
+    .requestPasswordReset({ emailAddress })
+    .then((res) => res.requestPasswordReset);
+}
+
+export async function resetPassword(token: string, password: string) {
+  return sdk
+    .resetPassword({ token, password })
+    .then((res) => res.resetPassword);
+}
+
 gql`
   mutation login($email: String!, $password: String!, $rememberMe: Boolean) {
     login(username: $email, password: $password, rememberMe: $rememberMe) {
@@ -247,6 +259,36 @@ gql`
       __typename
       ... on Success {
         success
+      }
+      ... on ErrorResult {
+        errorCode
+        message
+      }
+    }
+  }
+`;
+
+gql`
+  mutation requestPasswordReset($emailAddress: String!) {
+    requestPasswordReset(emailAddress: $emailAddress) {
+      __typename
+      ... on Success {
+        success
+      }
+      ... on ErrorResult {
+        errorCode
+        message
+      }
+    }
+  }
+`;
+
+gql`
+  mutation resetPassword($token: String!, $password: String!) {
+    resetPassword(token: $token, password: $password) {
+      __typename
+      ... on CurrentUser {
+        identifier
       }
       ... on ErrorResult {
         errorCode
