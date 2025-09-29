@@ -31,6 +31,8 @@ import { useActiveOrder } from '~/utils/use-active-order';
 import { useChangeLanguage } from 'remix-i18next';
 import { useTranslation } from 'react-i18next';
 import { getI18NextServer } from '~/i18next.server';
+import { OrderDetailFragment } from './generated/graphql';
+import { CartLoaderData } from './routes/api.active-order';
 
 export const meta: MetaFunction = () => {
   return [{ title: APP_META_TITLE }, { description: APP_META_DESCRIPTION }];
@@ -140,13 +142,13 @@ export default function App() {
         <CartTray
           open={open}
           onClose={setOpen}
-          activeOrder={activeOrder}
+          activeOrder={activeOrder as CartLoaderData['activeOrder']}
           adjustOrderLine={adjustOrderLine}
           removeItem={removeItem}
         />
         <ScrollRestoration />
         <Scripts />
-        <Footer collections={collections}></Footer>
+        <Footer />
 
         {devMode && <LiveReload />}
       </body>

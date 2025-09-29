@@ -1,27 +1,26 @@
-import { DataFunctionArgs, json } from '@remix-run/server-runtime';
-import { useState } from 'react';
-import { Price } from '~/components/products/Price';
-import { getProductBySlug } from '~/providers/products/products';
+import { CheckIcon, HeartIcon, PhotoIcon } from '@heroicons/react/24/solid';
 import {
   FetcherWithComponents,
+  MetaFunction,
   ShouldRevalidateFunction,
   useLoaderData,
   useOutletContext,
-  MetaFunction,
 } from '@remix-run/react';
-import { CheckIcon, HeartIcon, PhotoIcon } from '@heroicons/react/24/solid';
+import { json, LoaderFunctionArgs } from '@remix-run/server-runtime';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import Alert from '~/components/Alert';
 import { Breadcrumbs } from '~/components/Breadcrumbs';
+import { Price } from '~/components/products/Price';
+import { ScrollableContainer } from '~/components/products/ScrollableContainer';
+import { StockLevelLabel } from '~/components/products/StockLevelLabel';
 import { APP_META_TITLE } from '~/constants';
+import { ErrorCode, ErrorResult } from '~/generated/graphql';
+import { getProductBySlug } from '~/providers/products/products';
 import { CartLoaderData } from '~/routes/api.active-order';
 import { getSessionStorage } from '~/sessions';
-import { ErrorCode, ErrorResult } from '~/generated/graphql';
-import Alert from '~/components/Alert';
-import { StockLevelLabel } from '~/components/products/StockLevelLabel';
-import TopReviews from '~/components/products/TopReviews';
-import { ScrollableContainer } from '~/components/products/ScrollableContainer';
-import { useTranslation } from 'react-i18next';
 
-export const meta: MetaFunction = ({ data }) => {
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
     {
       title: data?.product?.name
@@ -31,7 +30,7 @@ export const meta: MetaFunction = ({ data }) => {
   ];
 };
 
-export async function loader({ params, request }: DataFunctionArgs) {
+export async function loader({ params, request }: LoaderFunctionArgs) {
   const { product } = await getProductBySlug(params.slug!, { request });
   if (!product) {
     throw new Response('Not Found', {
@@ -82,11 +81,6 @@ export default function ProductSlug() {
   const qtyInCart =
     activeOrder?.lines.find((l) => l.productVariant.id === selectedVariantId)
       ?.quantity ?? 0;
-
-  const asset = product.assets[0];
-  const brandName = product.facetValues.find(
-    (fv) => fv.facet.code === 'brand',
-  )?.name;
 
   const [featuredAsset, setFeaturedAsset] = useState(
     selectedVariant?.featuredAsset,
@@ -205,44 +199,29 @@ export default function ProductSlug() {
                     currencyCode={selectedVariant?.currencyCode}
                   ></Price>
                 </p>
-                <div className="flex sm:flex-col1 align-baseline">
-                  <button
-                    type="submit"
-                    className={`max-w-xs flex-1 ${
-                      activeOrderFetcher.state !== 'idle'
-                        ? 'bg-gray-400'
-                        : qtyInCart === 0
-                        ? 'bg-primary-600 hover:bg-primary-700'
-                        : 'bg-green-600 active:bg-green-700 hover:bg-green-700'
-                    }
+                <button
+                  type="submit"
+                  className={`max-w-xs flex-1 ${
+                    activeOrderFetcher.state !== 'idle'
+                      ? 'bg-gray-400'
+                      : qtyInCart === 0
+                      ? 'bg-primary-600 hover:bg-primary-700'
+                      : 'bg-green-600 active:bg-green-700 hover:bg-green-700'
+                  }
                                      transition-colors border border-transparent rounded-md py-3 px-8 flex items-center
                                       justify-center text-base font-medium text-white focus:outline-none
                                       focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-primary-500 sm:w-full`}
-                    disabled={activeOrderFetcher.state !== 'idle'}
-                  >
-                    {qtyInCart ? (
-                      <span className="flex items-center">
-                        <CheckIcon className="w-5 h-5 mr-1" /> {qtyInCart}{' '}
-                        {t('product.inCart')}
-                      </span>
-                    ) : (
-                      t('product.addToCart')
-                    )}
-                  </button>
-
-                  <button
-                    type="button"
-                    className="ml-4 py-3 px-3 rounded-md flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-500"
-                  >
-                    <HeartIcon
-                      className="h-6 w-6 flex-shrink-0"
-                      aria-hidden="true"
-                    />
-                    <span className="sr-only">
-                      {t('product.addToFavorites')}
+                  disabled={activeOrderFetcher.state !== 'idle'}
+                >
+                  {qtyInCart ? (
+                    <span className="flex items-center">
+                      <CheckIcon className="w-5 h-5 mr-1" /> {qtyInCart}{' '}
+                      {t('product.inCart')}
                     </span>
-                  </button>
-                </div>
+                  ) : (
+                    t('product.addToCart')
+                  )}
+                </button>
               </div>
               <div className="mt-2 flex items-center space-x-2">
                 <span className="text-gray-500">{selectedVariant?.sku}</span>
@@ -267,9 +246,6 @@ export default function ProductSlug() {
             </activeOrderFetcher.Form>
           </div>
         </div>
-      </div>
-      <div className="mt-24">
-        <TopReviews></TopReviews>
       </div>
     </div>
   );

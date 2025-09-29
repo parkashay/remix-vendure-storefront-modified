@@ -5,6 +5,7 @@ import { OutletContext } from '~/types';
 import { classNames } from '~/utils/class-names';
 import { CartTotals } from '~/components/cart/CartTotals';
 import { useTranslation } from 'react-i18next';
+import { OrderDetailFragment } from '~/generated/graphql';
 
 const steps = ['shipping', 'payment', 'confirmation'];
 
@@ -75,7 +76,9 @@ export default function Checkout() {
                 removeItem={removeItem}
                 adjustOrderLine={adjustOrderLine}
               ></CartContents>
-              <CartTotals order={activeOrder}></CartTotals>
+              <CartTotals
+                order={activeOrder as OrderDetailFragment}
+              ></CartTotals>
             </div>
           )}
         </div>

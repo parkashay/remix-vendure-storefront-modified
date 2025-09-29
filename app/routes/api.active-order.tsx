@@ -7,7 +7,11 @@ import {
   setOrderShippingAddress,
   setOrderShippingMethod,
 } from '~/providers/orders/order';
-import { DataFunctionArgs, json } from '@remix-run/server-runtime';
+import {
+  DataFunctionArgs,
+  json,
+  LoaderFunctionArgs,
+} from '@remix-run/server-runtime';
 import {
   CreateAddressInput,
   CreateCustomerInput,
@@ -20,7 +24,7 @@ import { shippingFormDataIsValid } from '~/utils/validation';
 
 export type CartLoaderData = Awaited<ReturnType<typeof loader>>;
 
-export async function loader({ request }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   return {
     activeOrder: await getActiveOrder({ request }),
   };
