@@ -5,34 +5,33 @@ import {
   Links,
   LiveReload,
   Meta,
+  MetaFunction,
   Outlet,
   Scripts,
   ScrollRestoration,
   ShouldRevalidateFunction,
   useLoaderData,
   useRouteError,
-  MetaFunction,
 } from '@remix-run/react';
-import stylesheet from './tailwind.css';
-import { Header } from './components/header/Header';
 import {
-  DataFunctionArgs,
   json,
   LinksFunction,
+  LoaderFunctionArgs,
 } from '@remix-run/server-runtime';
-import { getCollections } from '~/providers/collections/collections';
-import { activeChannel } from '~/providers/channel/channel';
-import { APP_META_DESCRIPTION, APP_META_TITLE } from '~/constants';
 import { useEffect, useState } from 'react';
-import { CartTray } from '~/components/cart/CartTray';
-import { getActiveCustomer } from '~/providers/customer/customer';
-import Footer from '~/components/footer/Footer';
-import { useActiveOrder } from '~/utils/use-active-order';
-import { useChangeLanguage } from 'remix-i18next';
 import { useTranslation } from 'react-i18next';
+import { useChangeLanguage } from 'remix-i18next';
+import { CartTray } from '~/components/cart/CartTray';
+import Footer from '~/components/footer/Footer';
+import { APP_META_DESCRIPTION, APP_META_TITLE } from '~/constants';
 import { getI18NextServer } from '~/i18next.server';
-import { OrderDetailFragment } from './generated/graphql';
+import { activeChannel } from '~/providers/channel/channel';
+import { getCollections } from '~/providers/collections/collections';
+import { getActiveCustomer } from '~/providers/customer/customer';
+import { useActiveOrder } from '~/utils/use-active-order';
+import { Header } from './components/header/Header';
 import { CartLoaderData } from './routes/api.active-order';
+import stylesheet from './tailwind.css';
 
 export const meta: MetaFunction = () => {
   return [{ title: APP_META_TITLE }, { description: APP_META_DESCRIPTION }];
@@ -74,7 +73,7 @@ export type RootLoaderData = {
   locale: string;
 };
 
-export async function loader({ request, params, context }: DataFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs) {
   const collections = await getCollections(request, { take: 20 });
   const topLevelCollections = collections.filter(
     (collection) => collection.parent?.name === '__root_collection__',
@@ -96,7 +95,6 @@ export async function loader({ request, params, context }: DataFunctionArgs) {
 export default function App() {
   const [open, setOpen] = useState(false);
   const loaderData = useLoaderData<RootLoaderData>();
-  const { collections } = loaderData;
   const { locale } = useLoaderData<typeof loader>();
   const { i18n } = useTranslation();
   const {
