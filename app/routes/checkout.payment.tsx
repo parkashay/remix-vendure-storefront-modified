@@ -16,6 +16,7 @@ import { BraintreeDropIn } from '~/components/checkout/braintree/BraintreePaymen
 import { getActiveOrder } from '~/providers/orders/order';
 import { getSessionStorage } from '~/sessions';
 import { useTranslation } from 'react-i18next';
+import { CreditPayment } from '~/components/checkout/CreditPayments';
 
 export async function loader({ params, request }: DataFunctionArgs) {
   const session = await getSessionStorage().then((sessionStorage) =>
@@ -172,6 +173,11 @@ export default function CheckoutPayment() {
               ></StripePayments>
             )}
           </div>
+        ) : paymentMethod.code.includes('credit-payment') ? (
+          <CreditPayment
+            paymentMethod={paymentMethod}
+            paymentError={paymentError}
+          />
         ) : (
           <div className="py-12" key={paymentMethod.id}>
             <DummyPayments
