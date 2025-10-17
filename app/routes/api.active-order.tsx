@@ -70,6 +70,7 @@ export async function action({ request, params }: DataFunctionArgs) {
       const customerData = Object.fromEntries<any>(
         body.entries(),
       ) as CreateCustomerInput;
+      console.log('first');
       const result = await setCustomerForOrder(
         {
           emailAddress: customerData.emailAddress,
@@ -159,7 +160,10 @@ export async function action({ request, params }: DataFunctionArgs) {
     'Set-Cookie': await sessionStorage.commitSession(session),
   };
   return json(
-    { activeOrder: activeOrder || (await getActiveOrder({ request })) },
+    {
+      activeOrder: activeOrder || (await getActiveOrder({ request })),
+      errorMessage: error?.message,
+    },
     {
       headers,
     },

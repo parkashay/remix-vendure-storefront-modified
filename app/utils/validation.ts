@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { ShippingFormData } from '~/types';
 
 export function shippingFormDataIsValid(
@@ -20,3 +21,21 @@ export function replaceEmptyString(input: string | undefined | null) {
   }
   return input;
 }
+
+export const CustomerForOrderSchema = z.object({
+  emailAddress: z.string().email({ message: 'Email is invalid' }),
+  firstName: z.string().min(1, { message: 'First name is required' }),
+  lastName: z.string().min(1, { message: 'Last name is required' }),
+});
+
+export const ShippingAdressFormSchema = z.object({
+  fullName: z.string().min(1, { message: 'Full name is required' }),
+  countryCode: z.string().min(1, { message: 'Country is required' }),
+  province: z.string().optional(),
+  city: z.string().min(1, { message: 'City is required' }),
+  streetLine1: z.string().min(1, { message: 'Street line 1 is required' }),
+  streetLine2: z.string().optional(),
+  postalCode: z.string().optional(),
+  company: z.string().optional(),
+  phoneNumber: z.string().optional(),
+});
