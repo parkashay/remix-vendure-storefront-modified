@@ -9,6 +9,7 @@ interface Props {
   onClick: () => void;
   children: React.ReactNode;
   className?: string;
+  disabled?: boolean;
 }
 
 export function CheckoutStepWrapper({
@@ -19,6 +20,7 @@ export function CheckoutStepWrapper({
   onClick,
   children,
   className,
+  disabled,
 }: Props) {
   return (
     <div
@@ -26,7 +28,9 @@ export function CheckoutStepWrapper({
       tabIndex={index}
       onClick={onClick}
       className={clsx(
-        'relative border p-2 md:p-4 rounded border-primary-300 hover:bg-primary-100',
+        'relative border p-2 md:p-4 rounded border-primary-300',
+        { 'hover:bg-primary-100': !disabled },
+        { 'cursor-default': disabled },
         className,
       )}
     >

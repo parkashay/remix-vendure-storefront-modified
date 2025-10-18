@@ -1,12 +1,7 @@
 import { RadioGroup } from '@headlessui/react';
-import { classNames } from '~/utils/class-names';
-import { Price } from '~/components/products/Price';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
-import {
-  ActiveCustomerAddressesQuery,
-  CurrencyCode,
-  EligibleShippingMethodsQuery,
-} from '~/generated/graphql';
+import { ActiveCustomerAddressesQuery } from '~/generated/graphql';
+import { classNames } from '~/utils/class-names';
 
 export type SelectedAddress = NonNullable<
   NonNullable<ActiveCustomerAddressesQuery['activeCustomer']>['addresses']

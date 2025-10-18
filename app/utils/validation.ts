@@ -31,15 +31,7 @@ export const CustomerForOrderSchema = z.object({
 
 export const REQUIRED_SHIPPING_ADDRESS_FIELDS: (keyof Partial<
   NonNullable<OrderDetailFragment['shippingAddress']>
->)[] = [
-  'fullName',
-  'countryCode',
-  'streetLine1',
-  'province',
-  'city',
-  'phoneNumber',
-  'postalCode',
-];
+>)[] = ['fullName', 'countryCode', 'streetLine1', 'province', 'city'];
 
 export const ShippingAdressFormSchema = z.object({
   fullName: REQUIRED_SHIPPING_ADDRESS_FIELDS.includes('fullName')

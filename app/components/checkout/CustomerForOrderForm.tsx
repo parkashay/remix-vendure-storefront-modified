@@ -1,30 +1,27 @@
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import {
-  useFetcher,
-  useOutletContext,
-  useSearchParams,
-} from '@remix-run/react';
+import { useFetcher, useSearchParams } from '@remix-run/react';
 import { withZod } from '@remix-validated-form/with-zod';
 import { useEffect } from 'react';
 import { ValidatedForm } from 'remix-validated-form';
 import {
-  ActiveOrderFetcherReturnType,
-  CHECKOUT_STEPS,
-  OutletContext,
-} from '~/types';
+  ActiveCustomerAddressesQuery,
+  OrderDetailFragment,
+} from '~/generated/graphql';
+import { ActiveOrderFetcherReturnType, CHECKOUT_STEPS } from '~/types';
 import { CustomerForOrderSchema } from '~/utils/validation';
 import { Button } from '../Button';
 import { Input } from '../Input';
 
-export function CustomerForOrderForm() {
-  const { activeOrder } = useOutletContext<OutletContext>();
+interface Props {
+  activeOrder: OrderDetailFragment;
+  activeCustomer: ActiveCustomerAddressesQuery['activeCustomer'];
+}
 
-  const customer = activeOrder?.customer;
-
+export function CustomerForOrderForm({ activeOrder }: Props) {
   const [_, setSearchParams] = useSearchParams();
-
   const fetcher = useFetcher<ActiveOrderFetcherReturnType>();
 
+  const customer = activeOrder?.customer;
   const isSubmitting = fetcher.state === 'submitting';
 
   useEffect(() => {

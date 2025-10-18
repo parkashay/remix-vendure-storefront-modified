@@ -50,17 +50,6 @@ export default function SignInPage() {
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <div className="bg-yellow-50 border border-yellow-400 text-yellow-800 rounded p-4 text-center text-sm">
-              <p>{t('vendure.demoCredentials')}</p>
-              <p>
-                {t('account.emailAddress')}
-                {': '}
-                <span className="font-bold">test@vendure.io</span>
-              </p>
-              <p>
-                {t('account.password')}: <span className="font-bold">test</span>
-              </p>
-            </div>
             <login.Form method="post">
               <fieldset disabled={login.state !== 'idle'} className="space-y-6">
                 <input
@@ -82,7 +71,6 @@ export default function SignInPage() {
                       type="email"
                       autoComplete="email"
                       required
-                      defaultValue="test@vendure.io"
                       placeholder={t('account.emailAddress')}
                       className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm disabled:text-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed"
                     />
@@ -104,7 +92,6 @@ export default function SignInPage() {
                       autoComplete="current-password"
                       required
                       placeholder={t('account.password')}
-                      defaultValue="test"
                       className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm disabled:text-gray-400 disabled:bg-gray-200 disabled:cursor-not-allowed"
                     />
                   </div>

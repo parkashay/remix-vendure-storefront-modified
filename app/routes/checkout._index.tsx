@@ -4,48 +4,90 @@ import {
   useOutletContext,
   useSearchParams,
 } from '@remix-run/react';
-import { json, LoaderFunctionArgs } from '@remix-run/server-runtime';
+import { LoaderFunctionArgs, redirect } from '@remix-run/server-runtime';
 import { Button } from '~/components/Button';
 import { CheckoutStepWrapper } from '~/components/checkout/CheckoutStepsWrapper';
 import { CustomerForOrderForm } from '~/components/checkout/CustomerForOrderForm';
 import { ShippingAddressForm } from '~/components/checkout/ShippingAddressForm';
 import { ShippingMethodSelector } from '~/components/checkout/ShippingMethodSelector';
+import { OrderDetailFragment } from '~/generated/graphql';
 import {
   getAvailableCountries,
   getEligibleShippingMethods,
 } from '~/providers/checkout/checkout';
+import { getActiveCustomerAddresses } from '~/providers/customer/customer';
+import { getActiveOrder } from '~/providers/orders/order';
 import { CHECKOUT_STEPS, OutletContext, StepTypes } from '~/types';
 import { REQUIRED_SHIPPING_ADDRESS_FIELDS } from '~/utils/validation';
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const { availableCountries } = await getAvailableCountries({ request });
-  const { eligibleShippingMethods } = await getEligibleShippingMethods({
+  const availableCountriesPromise = getAvailableCountries({ request });
+  const eligibleShippingMethodsPromise = getEligibleShippingMethods({
     request,
   });
-  return json({ availableCountries, eligibleShippingMethods });
+  const activeCustomerPromise = getActiveCustomerAddresses({ request });
+
+  const activeOrderPromise = getActiveOrder({ request });
+
+  const [
+    activeOrder,
+    { availableCountries },
+    { eligibleShippingMethods },
+    { activeCustomer },
+  ] = await Promise.all([
+    activeOrderPromise,
+    availableCountriesPromise,
+    eligibleShippingMethodsPromise,
+    activeCustomerPromise,
+  ]);
+
+  if (!activeOrder) {
+    return redirect('/');
+  }
+
+  return {
+    availableCountries,
+    eligibleShippingMethods,
+    activeCustomer,
+    activeOrder,
+  };
 }
 
 export default function CheckoutShipping() {
-  const { availableCountries, eligibleShippingMethods } =
-    useLoaderData<typeof loader>();
+  const {
+    availableCountries,
+    eligibleShippingMethods,
+    activeOrder,
+    activeCustomer,
+  } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const navigate = useNavigate();
 
-  const currentStep: StepTypes =
-    (searchParams.get('step') as StepTypes) || CHECKOUT_STEPS.CUSTOMER;
+  const shippingAddress = activeOrder?.shippingAddress;
+  const isSignedIn = Boolean(activeCustomer?.id);
 
-  const { activeOrder, activeOrderFetcher } = useOutletContext<OutletContext>();
+  function getCurrentStep() {
+    const step = searchParams.get('step') as StepTypes;
+    if (step) {
+      return step;
+    }
+    if (isSignedIn) {
+      return CHECKOUT_STEPS.ADDRESS;
+    }
+    return CHECKOUT_STEPS.CUSTOMER;
+  }
+  const currentStep: StepTypes = getCurrentStep();
+
+  const { activeOrderFetcher } = useOutletContext<OutletContext>();
 
   const isCustomerFormComplete = Boolean(activeOrder?.customer);
   const isShippingAddressFormComplete = (() => {
-    const shippingAddress = activeOrder?.shippingAddress;
     if (!shippingAddress) {
       return false;
     }
 
     for (const field of REQUIRED_SHIPPING_ADDRESS_FIELDS) {
-      console.log(shippingAddress[field]);
       if (!shippingAddress[field]) {
         return false;
       }
@@ -72,13 +114,21 @@ export default function CheckoutShipping() {
   })();
 
   const shippingAddressSummary = (() => {
-    if (
-      activeOrder?.shippingAddress?.streetLine1 &&
-      activeOrder?.shippingAddress?.province
-    ) {
-      return `${activeOrder?.shippingAddress?.streetLine1}, ${activeOrder?.shippingAddress?.province}`;
+    const summaryArray: string[] = [];
+    if (shippingAddress?.streetLine1) {
+      summaryArray.push(shippingAddress?.streetLine1);
     }
-    return null;
+    if (shippingAddress?.city) {
+      summaryArray.push(shippingAddress?.city);
+    }
+    if (shippingAddress?.province) {
+      summaryArray.push(shippingAddress?.province);
+    }
+    if (shippingAddress?.countryCode) {
+      summaryArray.push(shippingAddress?.countryCode);
+    }
+
+    return summaryArray.join(', ');
   })();
 
   const shippingMethodSummary = (() => {
@@ -113,13 +163,24 @@ export default function CheckoutShipping() {
         title="Customer Information"
         subtitle={customerInfoSummary || ''}
         onClick={() => {
-          if (currentStep !== CHECKOUT_STEPS.CUSTOMER) {
+          if (currentStep !== CHECKOUT_STEPS.CUSTOMER && !isSignedIn) {
             goBackToSpecificStep(CHECKOUT_STEPS.CUSTOMER);
           }
         }}
         complete={isCustomerFormComplete}
+        disabled={isSignedIn}
       >
-        {currentStep === CHECKOUT_STEPS.CUSTOMER && <CustomerForOrderForm />}
+        {currentStep === CHECKOUT_STEPS.CUSTOMER && !isSignedIn && (
+          <CustomerForOrderForm
+            activeOrder={activeOrder as OrderDetailFragment}
+            activeCustomer={activeCustomer}
+          />
+        )}
+        {isSignedIn && (
+          <span className="absolute right-2 bottom-2 px-2 py-1 bg-primary-100 text-primary-500 rounded-lg text-sm border border-primary-300">
+            Signed In
+          </span>
+        )}
       </CheckoutStepWrapper>
 
       <CheckoutStepWrapper
@@ -132,15 +193,22 @@ export default function CheckoutShipping() {
           }
         }}
         complete={isShippingAddressFormComplete}
+        disabled={
+          !isCustomerFormComplete || currentStep === CHECKOUT_STEPS.ADDRESS
+        }
       >
         {currentStep === CHECKOUT_STEPS.ADDRESS && (
-          <ShippingAddressForm availableCountries={availableCountries} />
+          <ShippingAddressForm
+            activeOrder={activeOrder as OrderDetailFragment}
+            availableCountries={availableCountries}
+            addresses={activeCustomer?.addresses}
+          />
         )}
       </CheckoutStepWrapper>
 
       <CheckoutStepWrapper
         index={2}
-        title="Shipping Address"
+        title="Delivery Method"
         subtitle={shippingMethodSummary || ''}
         onClick={() => {
           if (currentStep !== CHECKOUT_STEPS.SHIPPING) {
@@ -148,6 +216,10 @@ export default function CheckoutShipping() {
           }
         }}
         complete={selectedShippingMethod}
+        disabled={
+          !isShippingAddressFormComplete ||
+          currentStep === CHECKOUT_STEPS.SHIPPING
+        }
       >
         {currentStep === CHECKOUT_STEPS.SHIPPING && (
           <ShippingMethodSelector
@@ -161,15 +233,17 @@ export default function CheckoutShipping() {
         )}
       </CheckoutStepWrapper>
 
-      <Button
-        onClick={() => {
-          navigate('/checkout/payment');
-        }}
-        className="mt-3 w-full"
-        disabled={!canProceedToPayment}
-      >
-        Proceed To Payment
-      </Button>
+      {currentStep === CHECKOUT_STEPS.SHIPPING && (
+        <Button
+          onClick={() => {
+            navigate('/checkout/payment');
+          }}
+          className="mt-3 w-full"
+          disabled={!canProceedToPayment}
+        >
+          Proceed To Payment
+        </Button>
+      )}
     </div>
   );
 }
