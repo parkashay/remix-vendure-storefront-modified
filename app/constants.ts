@@ -1,6 +1,5 @@
-export const APP_META_TITLE = 'Vendure Remix Storefront';
-export const APP_META_DESCRIPTION =
-  'A headless commerce storefront starter kit built with Remix & Vendure';
+export const APP_META_TITLE = 'Improved Storefront';
+export const APP_META_DESCRIPTION = 'Storefront from vendure and prakash';
 export const DEMO_API_URL = 'https://admin.hyperce.io/shop-api';
 export let API_URL =
   typeof process !== 'undefined'
