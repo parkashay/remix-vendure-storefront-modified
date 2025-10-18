@@ -10,12 +10,12 @@ import { CheckoutStepWrapper } from '~/components/checkout/CheckoutStepsWrapper'
 import { CustomerForOrderForm } from '~/components/checkout/CustomerForOrderForm';
 import { ShippingAddressForm } from '~/components/checkout/ShippingAddressForm';
 import { ShippingMethodSelector } from '~/components/checkout/ShippingMethodSelector';
-import { OrderDetailFragment } from '~/generated/graphql';
 import {
   getAvailableCountries,
   getEligibleShippingMethods,
 } from '~/providers/checkout/checkout';
 import { CHECKOUT_STEPS, OutletContext, StepTypes } from '~/types';
+import { REQUIRED_SHIPPING_ADDRESS_FIELDS } from '~/utils/validation';
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { availableCountries } = await getAvailableCountries({ request });
@@ -37,10 +37,6 @@ export default function CheckoutShipping() {
 
   const { activeOrder, activeOrderFetcher } = useOutletContext<OutletContext>();
 
-  const requiredShippingFields: (keyof Partial<
-    NonNullable<OrderDetailFragment['shippingAddress']>
-  >)[] = ['fullName', 'countryCode', 'streetLine1', 'province'];
-
   const isCustomerFormComplete = Boolean(activeOrder?.customer);
   const isShippingAddressFormComplete = (() => {
     const shippingAddress = activeOrder?.shippingAddress;
@@ -48,7 +44,8 @@ export default function CheckoutShipping() {
       return false;
     }
 
-    for (const field of requiredShippingFields) {
+    for (const field of REQUIRED_SHIPPING_ADDRESS_FIELDS) {
+      console.log(shippingAddress[field]);
       if (!shippingAddress[field]) {
         return false;
       }

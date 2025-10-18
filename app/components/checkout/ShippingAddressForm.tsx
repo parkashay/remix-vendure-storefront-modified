@@ -57,10 +57,18 @@ export function ShippingAddressForm({ availableCountries }: Props) {
         required
       />
 
+      <Input
+        name="company"
+        label="Company"
+        defaultValue={address?.company ?? ''}
+        autoComplete="organization"
+      />
+
       <Select
         name="countryCode"
         label="Country"
         defaultValue={address?.countryCode ?? availableCountries[0].code}
+        required
       >
         {availableCountries?.map((c) => (
           <option value={c.code} key={c.id}>
@@ -76,18 +84,13 @@ export function ShippingAddressForm({ availableCountries }: Props) {
         defaultValue={address?.city ?? ''}
         required
       />
-      <Input
-        name="company"
-        label="Company"
-        defaultValue={address?.company ?? ''}
-        autoComplete="organization"
-      />
 
       <Input
         name="phoneNumber"
         label="Phone Number"
         autoComplete="tel"
         defaultValue={address?.phoneNumber ?? ''}
+        required
       />
 
       <Input
@@ -95,14 +98,15 @@ export function ShippingAddressForm({ availableCountries }: Props) {
         label="Address"
         autoComplete="address-line1"
         defaultValue={address?.streetLine1 ?? ''}
+        required
       />
 
       <Input
         name="province"
         label="Province"
         autoComplete="address-level1"
-        required
         defaultValue={address?.province ?? ''}
+        required
       />
 
       <Input
@@ -110,6 +114,7 @@ export function ShippingAddressForm({ availableCountries }: Props) {
         label="Postal Code"
         autoComplete="postal-code"
         defaultValue={address?.postalCode ?? ''}
+        required
       />
 
       <Button className="my-3 col-span-2" disabled={isSubmitting}>

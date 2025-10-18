@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { OrderDetailFragment } from '~/generated/graphql';
 import { ShippingFormData } from '~/types';
 
 export function shippingFormDataIsValid(
@@ -28,14 +29,52 @@ export const CustomerForOrderSchema = z.object({
   lastName: z.string().min(1, { message: 'Last name is required' }),
 });
 
+export const REQUIRED_SHIPPING_ADDRESS_FIELDS: (keyof Partial<
+  NonNullable<OrderDetailFragment['shippingAddress']>
+>)[] = [
+  'fullName',
+  'countryCode',
+  'streetLine1',
+  'province',
+  'city',
+  'phoneNumber',
+  'postalCode',
+];
+
 export const ShippingAdressFormSchema = z.object({
-  fullName: z.string().min(1, { message: 'Full name is required' }),
-  countryCode: z.string().min(1, { message: 'Country is required' }),
-  province: z.string().optional(),
-  city: z.string().min(1, { message: 'City is required' }),
-  streetLine1: z.string().min(1, { message: 'Street line 1 is required' }),
-  streetLine2: z.string().optional(),
-  postalCode: z.string().optional(),
-  company: z.string().optional(),
-  phoneNumber: z.string().optional(),
+  fullName: REQUIRED_SHIPPING_ADDRESS_FIELDS.includes('fullName')
+    ? z.string().min(1, { message: 'Full name is required' })
+    : z.string().optional(),
+
+  countryCode: REQUIRED_SHIPPING_ADDRESS_FIELDS.includes('countryCode')
+    ? z.string().min(1, { message: 'Country code is required' })
+    : z.string().optional(),
+
+  province: REQUIRED_SHIPPING_ADDRESS_FIELDS.includes('province')
+    ? z.string().min(1, { message: 'Province is required' })
+    : z.string().optional(),
+
+  city: REQUIRED_SHIPPING_ADDRESS_FIELDS.includes('city')
+    ? z.string().min(1, { message: 'City is required' })
+    : z.string().optional(),
+
+  streetLine1: REQUIRED_SHIPPING_ADDRESS_FIELDS.includes('streetLine1')
+    ? z.string().min(1, { message: 'Street line 1 is required' })
+    : z.string().optional(),
+
+  phoneNumber: REQUIRED_SHIPPING_ADDRESS_FIELDS.includes('phoneNumber')
+    ? z.string().min(9, { message: 'Invalid Phone Number' })
+    : z.string().optional(),
+
+  postalCode: REQUIRED_SHIPPING_ADDRESS_FIELDS.includes('postalCode')
+    ? z.string().min(1, { message: 'Postal code is required' })
+    : z.string().optional(),
+
+  streetLine2: REQUIRED_SHIPPING_ADDRESS_FIELDS.includes('streetLine2')
+    ? z.string().min(1, { message: 'Street line 2 is required' })
+    : z.string().optional(),
+
+  company: REQUIRED_SHIPPING_ADDRESS_FIELDS.includes('company')
+    ? z.string().min(1, { message: 'Company is required' })
+    : z.string().optional(),
 });
