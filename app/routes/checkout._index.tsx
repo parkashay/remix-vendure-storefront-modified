@@ -207,7 +207,7 @@ export default function CheckoutShipping() {
       </CheckoutStepWrapper>
 
       <CheckoutStepWrapper
-        index={2}
+        index={3}
         title="Delivery Method"
         subtitle={shippingMethodSummary || ''}
         onClick={() => {
